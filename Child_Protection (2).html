@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Child Safety Reporter // Secure Network</title>
+<meta name="description" content="Encrypted, anonymous reporting platform for suspected child sexual abuse material and online exploitation. Reports forwarded directly to global law enforcement agencies.">
+<meta name="robots" content="noindex,nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#000000; --bg2:#080000; --bg3:#0d0000;
+  --red:#cc0000; --red-hi:#ff2200; --red-lo:#660000; --red-dim:#3a0000;
+  --amber:#ffaa00; --amber-hi:#ffd000;
+  --muted:#552222; --text:#cc4422; --soft:#884444;
+  --D:'Orbitron',monospace; --M:'Share Tech Mono',monospace; --V:'VT323',monospace;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--M);line-height:1.6;overflow-x:hidden;cursor:crosshair}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.1) 3px,rgba(0,0,0,.1) 4px);pointer-events:none;z-index:9000}
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--red) 30%,var(--red-hi) 50%,var(--red) 70%,transparent);box-shadow:0 0 16px var(--red);z-index:9001}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:#000}
+::-webkit-scrollbar-thumb{background:var(--red-lo)}
+#rain{position:fixed;inset:0;opacity:.14;z-index:0;pointer-events:none}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes pulse{0%,100%{box-shadow:0 0 8px var(--red)}50%{box-shadow:0 0 24px var(--red-hi),0 0 48px var(--red)}}
+@keyframes eyeGlow{0%,100%{text-shadow:0 0 8px var(--amber)}50%{text-shadow:0 0 24px var(--amber-hi),0 0 48px var(--amber)}}
+@keyframes ticker{0%{transform:translateX(100%)}100%{transform:translateX(-200%)}}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:500;display:flex;align-items:center;justify-content:space-between;padding:.8rem 2.5rem;background:rgba(0,0,0,.97);border-bottom:1px solid var(--red-lo);box-shadow:0 0 24px rgba(204,0,0,.15)}
+.logo{display:flex;align-items:center;gap:.8rem;text-decoration:none}
+.logo-text{font-family:var(--D);font-size:.68rem;font-weight:700;color:var(--red);line-height:1.2;letter-spacing:.1em}
+.logo-text em{font-style:normal;color:var(--amber);animation:eyeGlow 2.5s ease-in-out infinite}
+.nav-links{display:flex;gap:1.5rem;list-style:none;align-items:center}
+.nav-links a{font-family:var(--D);font-size:.6rem;letter-spacing:.15em;color:var(--red-lo);text-decoration:none;transition:color .2s;text-transform:uppercase}
+.nav-links a:hover{color:var(--red-hi);text-shadow:0 0 10px var(--red)}
+.nav-cta{color:var(--amber)!important;border:1px solid rgba(255,170,0,.5);padding:.35rem .9rem}
+.nav-cta:hover{background:rgba(255,170,0,.08)!important;text-shadow:0 0 8px var(--amber)!important}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none}
+.hamburger span{width:22px;height:1px;background:var(--red);display:block}
+.mob-nav{display:none;position:fixed;inset:0;top:56px;background:rgba(0,0,0,.99);border-top:1px solid var(--red-lo);z-index:499;flex-direction:column;align-items:center;justify-content:center;gap:2rem}
+.mob-nav.open{display:flex}
+.mob-nav a{font-family:var(--D);font-size:1rem;color:var(--red);text-decoration:none;letter-spacing:.15em}
+
+#home{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:7rem 2.5rem 4rem;position:relative;overflow:hidden}
+.hero-grid{position:absolute;inset:0;z-index:1;background-image:linear-gradient(rgba(204,0,0,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(204,0,0,.05) 1px,transparent 1px);background-size:50px 50px}
+.corner{position:absolute;width:50px;height:50px;z-index:2}
+.c-tl{top:80px;left:20px;border-top:1px solid var(--red-lo);border-left:1px solid var(--red-lo)}
+.c-tr{top:80px;right:20px;border-top:1px solid var(--red-lo);border-right:1px solid var(--red-lo)}
+.c-bl{bottom:20px;left:20px;border-bottom:1px solid var(--red-lo);border-left:1px solid var(--red-lo)}
+.c-br{bottom:20px;right:20px;border-bottom:1px solid var(--red-lo);border-right:1px solid var(--red-lo)}
+.hero-inner{position:relative;z-index:3;max-width:980px}
+.hero-tag{display:inline-flex;align-items:center;gap:.6rem;font-family:var(--D);font-size:.6rem;letter-spacing:.2em;color:var(--red);border:1px solid var(--red-lo);padding:.3rem .9rem;margin-bottom:1.5rem;animation:fadeUp .8s ease both}
+.hero-tag::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 8px var(--amber);animation:blink 1.2s step-end infinite}
+.hero-title{font-family:var(--D);font-size:clamp(2.2rem,6vw,5rem);font-weight:900;line-height:.95;letter-spacing:.03em;color:var(--red);text-shadow:0 0 30px rgba(204,0,0,.6);margin-bottom:.75rem;animation:fadeUp .8s ease .2s both}
+.hero-title .amber{color:var(--amber);animation:eyeGlow 2.5s ease-in-out infinite}
+.hero-sub{font-family:var(--V);font-size:1.5rem;letter-spacing:.1em;color:var(--red-lo);margin-bottom:1.5rem;animation:fadeUp .8s ease .4s both}
+.hero-desc{font-size:.82rem;color:var(--soft);max-width:580px;line-height:1.8;border-left:2px solid var(--red-lo);padding-left:1rem;margin-bottom:2.5rem;animation:fadeUp .8s ease .6s both}
+.hero-btns{display:flex;gap:1rem;flex-wrap:wrap;animation:fadeUp .8s ease .8s both}
+.btn-red{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--D);font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;padding:.8rem 1.8rem;border:1px solid var(--red);background:rgba(204,0,0,.15);color:var(--red-hi);cursor:pointer;transition:all .2s;box-shadow:0 0 16px rgba(204,0,0,.25)}
+.btn-red:hover{background:rgba(204,0,0,.28);box-shadow:0 0 32px rgba(255,34,0,.5);transform:translateY(-1px)}
+.btn-ghost{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--D);font-size:.65rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;padding:.8rem 1.8rem;border:1px solid var(--red-lo);background:transparent;color:var(--amber);cursor:pointer;transition:all .2s}
+.btn-ghost:hover{border-color:var(--amber);box-shadow:0 0 16px rgba(255,170,0,.2);transform:translateY(-1px)}
+.hero-stats{display:flex;gap:2.5rem;flex-wrap:wrap;margin-top:3rem;animation:fadeUp .8s ease 1s both}
+.stat{border-left:2px solid var(--red-lo);padding-left:1rem}
+.stat-n{font-family:var(--D);font-size:1.6rem;font-weight:900;color:var(--red);text-shadow:0 0 16px rgba(204,0,0,.6)}
+.stat-l{font-size:.62rem;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+
+.ticker-wrap{overflow:hidden;background:rgba(204,0,0,.06);border-top:1px solid var(--red-lo);border-bottom:1px solid var(--red-lo);padding:.4rem 0;position:relative;z-index:2}
+.ticker-inner{display:inline-block;white-space:nowrap;animation:ticker 32s linear infinite;font-size:.65rem;letter-spacing:.15em;color:var(--red-lo);font-family:var(--D)}
+
+.warn-bar{display:flex;align-items:flex-start;gap:1.5rem;background:rgba(204,0,0,.06);border:1px solid var(--red);border-left:4px solid var(--red-hi);padding:1.2rem 2.5rem;position:relative;z-index:2;animation:pulse 3s ease-in-out infinite}
+.warn-bar svg{flex-shrink:0;margin-top:2px}
+.warn-title{font-family:var(--D);font-size:.68rem;letter-spacing:.15em;color:var(--amber);margin-bottom:.35rem;text-shadow:0 0 8px rgba(255,170,0,.4)}
+.warn-text{font-size:.78rem;color:var(--soft);line-height:1.6}
+
+section{padding:5rem 2.5rem;position:relative;z-index:2}
+#report{background:var(--bg2)}
+#emergency{background:var(--bg)}
+#education{background:var(--bg3)}
+#privacy{background:var(--bg)}
+.sec-tag{font-family:var(--M);font-size:.68rem;color:var(--red-lo);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.5rem;display:flex;align-items:center;gap:.6rem}
+.sec-tag::before{content:'//';color:var(--red)}
+.sec-title{font-family:var(--D);font-size:clamp(1.5rem,3.5vw,2.4rem);font-weight:900;letter-spacing:.04em;color:var(--red);text-shadow:0 0 16px rgba(204,0,0,.4);line-height:1.1;margin-bottom:.6rem}
+.sec-desc{font-size:.8rem;color:var(--soft);max-width:540px;line-height:1.8;margin-bottom:3rem}
+
+.form-box{max-width:800px;background:rgba(204,0,0,.03);border:1px solid var(--red-lo);padding:2.5rem;position:relative}
+.form-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--red-lo),var(--red),var(--red-lo),transparent)}
+.form-head{display:flex;align-items:center;gap:.75rem;margin-bottom:2rem;padding-bottom:1rem;border-bottom:1px solid rgba(204,0,0,.12)}
+.f-dots{display:flex;gap:6px}
+.fd{width:10px;height:10px;border-radius:50%}
+.fd-r{background:var(--red-hi);box-shadow:0 0 6px var(--red-hi)}
+.fd-a{background:var(--amber);box-shadow:0 0 6px var(--amber)}
+.fd-d{background:var(--red-dim)}
+.form-title{font-family:var(--M);font-size:.72rem;color:var(--red-lo);letter-spacing:.1em}
+.enc-badge{display:inline-flex;align-items:center;gap:.5rem;border:1px solid rgba(255,170,0,.35);color:var(--amber);padding:.35rem .9rem;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;font-family:var(--D);margin-bottom:1.5rem}
+.anon-row{display:flex;align-items:center;gap:.75rem;background:rgba(204,0,0,.04);border:1px solid rgba(204,0,0,.15);padding:.85rem 1.2rem;margin-bottom:2rem;cursor:pointer;transition:border-color .2s}
+.anon-row:hover{border-color:var(--red-lo)}
+.tog{width:38px;height:20px;background:var(--red-lo);border:1px solid var(--red);position:relative;flex-shrink:0;box-shadow:0 0 8px rgba(204,0,0,.3);transition:background .3s}
+.tog::after{content:'';position:absolute;right:3px;top:2px;width:14px;height:14px;background:var(--amber);box-shadow:0 0 6px var(--amber);transition:all .3s}
+.tog.off{background:var(--red-dim);border-color:var(--muted)}
+.tog.off::after{right:auto;left:3px;background:#553333;box-shadow:none}
+.anon-label strong{font-size:.75rem;display:block;font-family:var(--D);font-weight:600;letter-spacing:.05em;color:var(--red)}
+.anon-label span{font-size:.7rem;color:var(--muted)}
+.fgrid{display:grid;gap:1.2rem}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+.field{display:flex;flex-direction:column;gap:.4rem}
+.field label{font-family:var(--D);font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
+.req{color:var(--amber)}
+.field input,.field select,.field textarea{background:rgba(0,0,0,.7);border:1px solid rgba(204,0,0,.2);color:var(--red);font-family:var(--M);font-size:.84rem;padding:.72rem 1rem;outline:none;transition:border-color .2s,box-shadow .2s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--red);box-shadow:0 0 12px rgba(204,0,0,.12)}
+.field input::placeholder,.field textarea::placeholder{color:rgba(204,0,0,.2)}
+.field select option{background:#080000;color:var(--red)}
+.field textarea{resize:vertical;min-height:120px}
+.upload-zone{border:1px dashed rgba(204,0,0,.3);padding:1.8rem;text-align:center;cursor:pointer;transition:all .2s}
+.upload-zone:hover{border-color:var(--red);background:rgba(204,0,0,.04)}
+.upload-zone input{display:none}
+.upload-txt{font-size:.8rem;color:var(--muted)}
+.upload-txt strong{color:var(--red)}
+.upload-note{font-size:.65rem;color:rgba(204,0,0,.3);margin-top:.3rem}
+.contact-field{display:none}
+.form-foot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-top:.5rem}
+.form-legal{font-size:.68rem;color:rgba(204,0,0,.3);max-width:340px;line-height:1.6}
+.success{display:none;background:rgba(204,0,0,.06);border:1px solid var(--red);padding:1.5rem;text-align:center;margin-top:1.5rem}
+.success.show{display:block;animation:fadeUp .5s ease both}
+.success h3{font-family:var(--D);font-size:.95rem;color:var(--amber);letter-spacing:.1em;margin-bottom:.4rem}
+.success p{font-size:.78rem;color:var(--soft)}
+
+.org-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.2rem}
+.org-card{background:rgba(204,0,0,.03);border:1px solid rgba(204,0,0,.12);padding:1.5rem;transition:all .3s;position:relative;overflow:hidden}
+.org-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--red-lo),transparent);opacity:0;transition:opacity .3s}
+.org-card:hover{border-color:var(--red-lo);box-shadow:0 0 16px rgba(204,0,0,.08);transform:translateY(-2px)}
+.org-card:hover::before,.org-card.hot::before{opacity:1}
+.org-card.hot{border-color:rgba(255,34,0,.3)}
+.org-card.hot::before{background:linear-gradient(90deg,var(--red-hi),var(--amber),transparent)}
+.org-flag{font-size:1.4rem;margin-bottom:.5rem}
+.org-name{font-family:var(--D);font-size:.78rem;font-weight:700;color:var(--red);margin-bottom:.2rem;letter-spacing:.05em}
+.org-region{font-size:.62rem;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.7rem}
+.org-desc{font-size:.76rem;color:var(--soft);line-height:1.6;margin-bottom:1rem}
+.org-links{display:flex;flex-direction:column;gap:.4rem}
+.org-a{font-size:.74rem;color:var(--red-lo);text-decoration:none;font-family:var(--M);transition:color .2s;display:flex;align-items:center;gap:.4rem}
+.org-a:hover{color:var(--red-hi);text-shadow:0 0 6px var(--red)}
+.org-a.hl{color:var(--amber)}
+.org-a.hl:hover{color:var(--amber-hi)}
+
+.edu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+.edu-card{background:rgba(0,0,0,.4);border:1px solid rgba(204,0,0,.1);padding:1.75rem;transition:border-color .3s}
+.edu-card:hover{border-color:rgba(204,0,0,.3)}
+.edu-n{font-family:var(--D);font-size:1.8rem;font-weight:900;color:rgba(204,0,0,.08);line-height:1;margin-bottom:.6rem}
+.edu-card h3{font-family:var(--D);font-size:.76rem;font-weight:700;color:var(--red);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.6rem}
+.edu-card p{font-size:.78rem;color:var(--soft);line-height:1.7}
+.signs-box{margin-top:2.5rem;background:rgba(204,0,0,.05);border:1px solid rgba(204,0,0,.2);padding:2rem}
+.signs-title{font-family:var(--D);font-size:.8rem;color:var(--amber);letter-spacing:.1em;text-transform:uppercase;text-shadow:0 0 8px rgba(255,170,0,.4);margin-bottom:1.2rem}
+.signs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.6rem}
+.sign{padding:.6rem .8rem;background:rgba(0,0,0,.3);border-left:2px solid rgba(204,0,0,.4);font-size:.76rem;color:var(--soft);line-height:1.5}
+
+.priv-grid{display:grid;gap:1rem;max-width:780px}
+.priv-item{display:grid;grid-template-columns:36px 1fr;gap:1.2rem;align-items:start;padding:1.2rem;background:rgba(204,0,0,.02);border:1px solid rgba(204,0,0,.08);transition:border-color .2s}
+.priv-item:hover{border-color:rgba(204,0,0,.22)}
+.priv-n{font-family:var(--D);font-size:1.1rem;font-weight:900;color:rgba(204,0,0,.18);line-height:1}
+.priv-item h3{font-family:var(--D);font-size:.74rem;font-weight:700;color:var(--red);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.35rem}
+.priv-item p{font-size:.76rem;color:var(--soft);line-height:1.7}
+
+/* SPONSOR BAR */
+.sponsor-bar{background:rgba(0,0,0,.9);border-top:1px solid rgba(204,0,0,.2);border-bottom:1px solid rgba(204,0,0,.1);padding:1.4rem 2.5rem;position:relative;z-index:2}
+.sponsor-label{font-family:var(--D);font-size:.55rem;letter-spacing:.22em;color:var(--muted);text-align:center;margin-bottom:1.1rem;text-transform:uppercase}
+.sponsor-label::before,.sponsor-label::after{content:'──';margin:0 .6rem;color:var(--red-dim)}
+.sponsor-list{display:flex;align-items:center;justify-content:center;gap:2.5rem;flex-wrap:wrap}
+.sponsor-item{display:flex;flex-direction:column;align-items:center;gap:.45rem;opacity:.55;transition:opacity .3s,filter .3s;filter:grayscale(40%)}
+.sponsor-item:hover{opacity:1;filter:grayscale(0%)}
+.sponsor-logo{width:46px;height:46px;display:flex;align-items:center;justify-content:center}
+.sponsor-logo img{width:46px;height:46px;object-fit:contain;filter:drop-shadow(0 0 4px rgba(204,0,0,.2))}
+.sponsor-name{font-family:var(--D);font-size:.52rem;letter-spacing:.1em;color:var(--muted);text-align:center;text-transform:uppercase;max-width:90px;line-height:1.3}
+.sponsor-divider{width:1px;height:38px;background:linear-gradient(to bottom,transparent,var(--red-dim),transparent);opacity:.4}
+@media(max-width:768px){
+  .sponsor-bar{padding:1.2rem 1.5rem}
+  .sponsor-list{gap:1.5rem}
+  .sponsor-divider{display:none}
+}
+
+/* EYE COMFORT sponsor */
+body.ec .sponsor-bar{background:rgba(244,237,228,.95)!important;border-color:rgba(139,74,15,.15)!important}
+body.ec .sponsor-item{filter:none!important}
+body.ec .sponsor-name{color:#9a6a4a!important}
+
+footer{background:#000;border-top:1px solid rgba(204,0,0,.18);padding:2rem 2.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;position:relative;z-index:2}
+.foot-logo{font-family:var(--D);font-size:.72rem;font-weight:700;color:var(--red);letter-spacing:.1em;text-shadow:0 0 8px rgba(204,0,0,.4)}
+.foot-logo em{font-style:normal;color:var(--amber)}
+.foot-copy{font-size:.62rem;color:var(--muted);margin-top:.2rem;font-family:var(--M)}
+.foot-nav{display:flex;gap:1.5rem;flex-wrap:wrap}
+.foot-nav a{font-size:.62rem;color:var(--muted);text-decoration:none;font-family:var(--M);letter-spacing:.1em;transition:color .2s}
+.foot-nav a:hover{color:var(--red);text-shadow:0 0 6px var(--red)}
+
+#music{position:fixed;bottom:24px;right:24px;z-index:800;background:rgba(4,0,0,.97);border:1px solid rgba(204,0,0,.4);padding:14px 16px;width:230px;box-shadow:0 8px 32px rgba(0,0,0,.8),0 0 20px rgba(204,0,0,.12);font-family:var(--M)}
+.music-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.music-label{font-size:.62rem;color:var(--red);letter-spacing:.15em}
+.music-close{background:none;border:none;color:var(--red-lo);cursor:pointer;font-size:.9rem;line-height:1}
+.music-close:hover{color:var(--red)}
+.music-modes{display:flex;gap:8px;margin-bottom:10px}
+.mmode{flex:1;padding:6px 4px;border:1px solid var(--red-lo);background:rgba(204,0,0,.08);color:var(--red-lo);font-family:var(--M);font-size:.65rem;cursor:pointer;letter-spacing:.08em;transition:all .2s}
+.mmode.a-sad{border-color:var(--red);color:var(--red-hi);background:rgba(204,0,0,.2)}
+.mmode.a-agg{border-color:var(--amber);color:var(--amber);background:rgba(255,170,0,.1)}
+.music-track{background:rgba(0,0,0,.6);border:1px solid rgba(204,0,0,.15);padding:8px 10px;margin-bottom:10px}
+#tname{font-size:.66rem;color:var(--red);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tsub{font-size:.58rem;color:var(--red-lo);letter-spacing:.06em}
+.music-play{width:100%;padding:8px;background:rgba(204,0,0,.12);border:1px solid rgba(204,0,0,.4);color:var(--red-hi);font-family:var(--M);font-size:.68rem;letter-spacing:.1em;cursor:pointer;transition:all .2s}
+.music-play:hover{background:rgba(204,0,0,.25);box-shadow:0 0 16px rgba(204,0,0,.3)}
+.music-note{text-align:center;font-size:.55rem;color:var(--red-dim);margin-top:6px;letter-spacing:.06em}
+
+#eyebtn{position:fixed;bottom:24px;left:24px;z-index:800;background:rgba(4,0,0,.95);border:1px solid rgba(204,0,0,.35);color:var(--red-lo);font-family:var(--M);font-size:.65rem;letter-spacing:.1em;padding:.5rem 1rem;cursor:pointer;transition:all .25s;box-shadow:0 0 10px rgba(204,0,0,.12)}
+#eyebtn:hover{border-color:var(--red);color:var(--red-hi);box-shadow:0 0 18px rgba(204,0,0,.25)}
+
+/* EYE COMFORT */
+body.ec{background:#f4ede4!important;color:#2a1508!important;filter:brightness(.93)}
+body.ec::before{opacity:.3}
+body.ec::after{display:none}
+body.ec #rain{display:none}
+body.ec .hero-grid{background-image:linear-gradient(rgba(80,40,20,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(80,40,20,.05) 1px,transparent 1px)!important}
+body.ec nav{background:rgba(244,237,228,.97)!important;border-bottom-color:rgba(80,40,20,.15)!important;box-shadow:none!important}
+body.ec .logo-text{color:#3a1a0a!important;text-shadow:none!important}
+body.ec .logo-text em{color:#8b4a0f!important;animation:none!important;text-shadow:none!important}
+body.ec .nav-links a{color:#7a4a2a!important}
+body.ec .nav-links a:hover{color:#3a1a0a!important;text-shadow:none!important}
+body.ec .nav-cta{color:#8b4a0f!important;border-color:#c4855a!important}
+body.ec #home,body.ec section{background:inherit!important}
+body.ec #report{background:#ece5dc!important}
+body.ec #education{background:#e8e0d6!important}
+body.ec .ticker-wrap{background:rgba(80,40,20,.06)!important;border-color:rgba(80,40,20,.15)!important}
+body.ec .ticker-inner{color:rgba(80,40,20,.4)!important}
+body.ec .warn-bar{background:rgba(139,58,15,.06)!important;border-color:#c4855a!important;border-left-color:#8b4a0f!important}
+body.ec .warn-title{color:#8b4a0f!important;text-shadow:none!important}
+body.ec .warn-text{color:#5a3a22!important}
+body.ec .corner{border-color:rgba(80,40,20,.15)!important}
+body.ec .hero-tag{color:#8b4a0f!important;border-color:rgba(139,74,15,.3)!important}
+body.ec .hero-tag::before{background:#c4855a!important;box-shadow:none!important}
+body.ec .hero-title{color:#2a1508!important;text-shadow:none!important}
+body.ec .hero-title .amber{color:#8b4a0f!important;animation:none!important;text-shadow:none!important}
+body.ec .hero-sub{color:#9a6a4a!important}
+body.ec .hero-desc{color:#5a3a22!important;border-left-color:#c4855a!important}
+body.ec .stat-n{color:#2a1508!important;text-shadow:none!important}
+body.ec .stat-l{color:#9a6a4a!important}
+body.ec .stat{border-left-color:#c4855a!important}
+body.ec .btn-red{background:rgba(139,74,15,.1)!important;color:#8b4a0f!important;border-color:#c4855a!important;box-shadow:none!important}
+body.ec .btn-ghost{color:#6a4a2a!important;border-color:rgba(106,74,42,.4)!important}
+body.ec .sec-tag{color:#9a6a4a!important}
+body.ec .sec-tag::before{color:#c4855a!important}
+body.ec .sec-title{color:#2a1508!important;text-shadow:none!important}
+body.ec .sec-desc{color:#5a3a22!important}
+body.ec .form-box{background:rgba(255,255,255,.5)!important;border-color:rgba(139,74,15,.25)!important}
+body.ec .form-box::before{background:linear-gradient(90deg,transparent,#c4855a,#8b4a0f,#c4855a,transparent)!important}
+body.ec .enc-badge{color:#5a7a3a!important;border-color:rgba(90,122,58,.4)!important}
+body.ec .anon-row{background:rgba(139,74,15,.05)!important;border-color:rgba(139,74,15,.2)!important}
+body.ec .tog{background:#c4855a!important;border-color:#8b4a0f!important;box-shadow:none!important}
+body.ec .tog::after{background:#fff4ec!important;box-shadow:none!important}
+body.ec .anon-label strong{color:#2a1508!important}
+body.ec .anon-label span{color:#9a6a4a!important}
+body.ec .field label{color:#9a6a4a!important}
+body.ec .req{color:#8b4a0f!important}
+body.ec .field input,body.ec .field select,body.ec .field textarea{background:rgba(255,255,255,.8)!important;border-color:rgba(139,74,15,.2)!important;color:#2a1508!important}
+body.ec .field input:focus,body.ec .field select:focus,body.ec .field textarea:focus{border-color:#8b4a0f!important;box-shadow:none!important}
+body.ec .field select option{background:#f4ede4!important;color:#2a1508!important}
+body.ec .upload-zone{border-color:rgba(139,74,15,.25)!important;background:rgba(255,255,255,.3)!important}
+body.ec .upload-txt{color:#5a3a22!important}
+body.ec .upload-txt strong{color:#8b4a0f!important}
+body.ec .org-card{background:rgba(255,255,255,.45)!important;border-color:rgba(139,74,15,.15)!important}
+body.ec .org-card:hover{box-shadow:0 2px 10px rgba(80,40,20,.1)!important}
+body.ec .org-name{color:#2a1508!important}
+body.ec .org-region{color:#9a6a4a!important}
+body.ec .org-desc{color:#5a3a22!important}
+body.ec .org-a{color:#7a5a3a!important}
+body.ec .org-a:hover{color:#2a1508!important;text-shadow:none!important}
+body.ec .org-a.hl{color:#8b4a0f!important}
+body.ec .edu-card{background:rgba(255,255,255,.35)!important;border-color:rgba(139,74,15,.12)!important}
+body.ec .edu-n{color:rgba(80,40,20,.08)!important}
+body.ec .edu-card h3{color:#2a1508!important}
+body.ec .edu-card p{color:#5a3a22!important}
+body.ec .signs-box{background:rgba(139,74,15,.05)!important;border-color:rgba(139,74,15,.2)!important}
+body.ec .signs-title{color:#8b4a0f!important;text-shadow:none!important}
+body.ec .sign{background:rgba(255,255,255,.3)!important;border-left-color:rgba(139,74,15,.35)!important;color:#5a3a22!important}
+body.ec .priv-item{background:rgba(255,255,255,.35)!important;border-color:rgba(139,74,15,.1)!important}
+body.ec .priv-n{color:rgba(80,40,20,.15)!important}
+body.ec .priv-item h3{color:#2a1508!important}
+body.ec .priv-item p{color:#5a3a22!important}
+body.ec footer{background:#e8e0d4!important;border-top-color:rgba(80,40,20,.12)!important}
+body.ec .foot-logo{color:#2a1508!important;text-shadow:none!important}
+body.ec .foot-logo em{color:#8b4a0f!important;text-shadow:none!important}
+body.ec .foot-copy{color:#9a6a4a!important}
+body.ec .foot-nav a{color:#9a6a4a!important}
+body.ec .foot-nav a:hover{color:#2a1508!important;text-shadow:none!important}
+body.ec .mob-nav{background:rgba(244,237,228,.99)!important}
+body.ec .mob-nav a{color:#2a1508!important;text-shadow:none!important}
+body.ec #music{background:rgba(244,237,228,.97)!important;border-color:rgba(139,74,15,.3)!important;box-shadow:0 2px 12px rgba(80,40,20,.12)!important}
+body.ec .music-label{color:#8b4a0f!important}
+body.ec .music-close{color:#c4855a!important}
+body.ec .mmode{background:rgba(139,74,15,.06)!important;border-color:rgba(139,74,15,.2)!important;color:#9a6a4a!important}
+body.ec .mmode.a-sad{border-color:#8b4a0f!important;color:#8b4a0f!important;background:rgba(139,74,15,.12)!important}
+body.ec .mmode.a-agg{border-color:#c4855a!important;color:#c4855a!important}
+body.ec .music-track{background:rgba(255,255,255,.5)!important;border-color:rgba(139,74,15,.15)!important}
+body.ec #tname{color:#2a1508!important}
+body.ec #tsub{color:#9a6a4a!important}
+body.ec .music-play{background:rgba(139,74,15,.1)!important;border-color:rgba(139,74,15,.4)!important;color:#8b4a0f!important}
+body.ec .music-note{color:rgba(80,40,20,.3)!important}
+body.ec #eyebtn{background:rgba(244,237,228,.95)!important;border-color:rgba(139,74,15,.3)!important;color:#8b4a0f!important;box-shadow:0 1px 8px rgba(80,40,20,.1)!important}
+
+@media(max-width:768px){
+  nav{padding:.7rem 1.5rem}
+  .nav-links{display:none}
+  .hamburger{display:flex}
+  #home,section{padding:3.5rem 1.5rem}
+  #home{padding-top:6rem}
+  .warn-bar{padding:1rem 1.5rem;flex-direction:column}
+  .frow{grid-template-columns:1fr}
+  .form-box{padding:1.5rem}
+  .form-foot{flex-direction:column}
+  footer{padding:1.5rem;flex-direction:column}
+  .corner{display:none}
+  #music{width:200px;right:12px;bottom:70px}
+  #eyebtn{left:12px;bottom:12px;font-size:.6rem;padding:.4rem .8rem}
+  #lockscreen{padding:1.5rem}
+  .lock-box{padding:2rem 1.5rem}
+}
+
+/* ── PAGE CONTENT hidden until unlocked ── */
+#pageContent{
+  transition:opacity .4s ease;
+}
+#pageContent[aria-hidden="true"]{
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  /* Fixed children escape visibility, so clip them via a 0-size clip */
+  position:fixed;
+  clip:rect(0,0,0,0);
+  clip-path:inset(100%);
+  width:0;height:0;overflow:hidden;
+}
+#pageContent:not([aria-hidden]){
+  visibility:visible;
+  opacity:1;
+  pointer-events:auto;
+  position:static;
+  clip:auto;
+  clip-path:none;
+  width:auto;height:auto;overflow:visible;
+}
+
+/* ── PASSCODE LOCK SCREEN ── */
+@keyframes lockFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes lockSlideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shakeX{0%,100%{transform:translateX(0)}15%,45%,75%{transform:translateX(-8px)}30%,60%,90%{transform:translateX(8px)}}
+@keyframes scanLine{0%{top:-4px}100%{top:100%}}
+@keyframes unlockPulse{0%{box-shadow:0 0 0 0 rgba(255,170,0,.6)}70%{box-shadow:0 0 0 18px rgba(255,170,0,0)}100%{box-shadow:0 0 0 0 rgba(255,170,0,0)}}
+
+#lockscreen{
+  position:fixed;inset:0;z-index:99990;
+  background:#000;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  animation:lockFadeIn .4s ease both;
+  overflow:hidden;
+}
+#lockscreen::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(204,0,0,.04) 3px,rgba(204,0,0,.04) 4px);
+  pointer-events:none;z-index:1;
+}
+#lockscreen::after{
+  content:'';position:absolute;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,transparent,rgba(204,0,0,.6),transparent);
+  box-shadow:0 0 12px rgba(204,0,0,.5);
+  animation:scanLine 3.5s linear infinite;
+  pointer-events:none;z-index:2;
+}
+#lockRain{position:absolute;inset:0;opacity:.1;z-index:0;pointer-events:none}
+.lock-box{
+  position:relative;z-index:3;
+  max-width:420px;width:100%;
+  background:rgba(6,0,0,.92);
+  border:1px solid rgba(204,0,0,.35);
+  padding:2.8rem 2.5rem 2.4rem;
+  animation:lockSlideUp .5s ease .15s both;
+  box-shadow:0 0 60px rgba(204,0,0,.12),0 0 120px rgba(204,0,0,.06);
+}
+.lock-box::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(204,0,0,.4),#ff2200,rgba(204,0,0,.4),transparent);
+}
+.lock-shield{
+  display:flex;justify-content:center;margin-bottom:1.4rem;
+}
+.lock-shield svg{filter:drop-shadow(0 0 12px rgba(204,0,0,.5))}
+.lock-agency{
+  font-family:'Orbitron',monospace;font-size:.55rem;letter-spacing:.25em;
+  color:rgba(204,0,0,.45);text-align:center;margin-bottom:.3rem;text-transform:uppercase;
+}
+.lock-title{
+  font-family:'Orbitron',monospace;font-size:1.05rem;font-weight:900;
+  letter-spacing:.08em;color:#cc0000;text-align:center;
+  text-shadow:0 0 20px rgba(204,0,0,.5);margin-bottom:.25rem;
+}
+.lock-sub{
+  font-family:'Share Tech Mono',monospace;font-size:.7rem;
+  color:rgba(204,68,34,.45);text-align:center;letter-spacing:.15em;margin-bottom:2rem;
+}
+.lock-input-wrap{position:relative;margin-bottom:.8rem}
+.lock-input-wrap::before{
+  content:'🔒';position:absolute;left:.9rem;top:50%;transform:translateY(-50%);
+  font-size:.85rem;pointer-events:none;opacity:.55;
+}
+#lockInput{
+  width:100%;background:rgba(0,0,0,.8);
+  border:1px solid rgba(204,0,0,.25);
+  color:#cc4422;font-family:'Share Tech Mono',monospace;
+  font-size:.88rem;letter-spacing:.12em;
+  padding:.85rem 1rem .85rem 2.6rem;
+  outline:none;transition:border-color .2s,box-shadow .2s;
+  caret-color:#ff2200;
+  -webkit-user-select:text!important;user-select:text!important;
+}
+#lockInput:focus{border-color:rgba(204,0,0,.6);box-shadow:0 0 16px rgba(204,0,0,.1)}
+#lockInput::placeholder{color:rgba(204,0,0,.2);letter-spacing:.08em}
+#lockInput.shake{animation:shakeX .4s ease}
+#lockInput.locked-ok{border-color:rgba(255,170,0,.7)!important;box-shadow:0 0 20px rgba(255,170,0,.2)!important;color:#ffaa00!important}
+#lockBtn{
+  width:100%;padding:.85rem;margin-top:.2rem;
+  background:rgba(204,0,0,.14);border:1px solid rgba(204,0,0,.45);
+  color:#ff2200;font-family:'Orbitron',monospace;
+  font-size:.65rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  cursor:pointer;transition:all .2s;
+  box-shadow:0 0 12px rgba(204,0,0,.2);
+}
+#lockBtn:hover{background:rgba(204,0,0,.28);box-shadow:0 0 28px rgba(255,34,0,.4);transform:translateY(-1px)}
+#lockBtn:active{transform:translateY(0)}
+#lockBtn.unlocking{animation:unlockPulse .6s ease;border-color:rgba(255,170,0,.7)!important;color:#ffaa00!important}
+#lockErr{
+  font-family:'Share Tech Mono',monospace;font-size:.66rem;letter-spacing:.1em;
+  color:#cc0000;text-align:center;margin-top:.7rem;min-height:1.2em;
+  text-shadow:0 0 8px rgba(204,0,0,.4);transition:opacity .2s;
+}
+.lock-attempts{
+  font-family:'Share Tech Mono',monospace;font-size:.58rem;
+  color:rgba(204,0,0,.25);text-align:center;margin-top:1.4rem;
+  letter-spacing:.1em;
+}
+.lock-attempts span{color:rgba(255,170,0,.4)}
+.lock-footer{
+  border-top:1px solid rgba(204,0,0,.1);padding-top:1.2rem;
+  margin-top:1.4rem;text-align:center;
+  font-family:'Share Tech Mono',monospace;font-size:.58rem;
+  color:rgba(204,0,0,.2);letter-spacing:.1em;line-height:1.8;
+}
+/* Unlock transition */
+#lockscreen.unlocking-out{animation:lockFadeIn .4s ease reverse both!important}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     PASSCODE LOCK SCREEN
+     ══════════════════════════════════════════ -->
+<div id="lockscreen" role="dialog" aria-modal="true" aria-label="Security passcode required">
+  <canvas id="lockRain"></canvas>
+  <div class="lock-box">
+    <div class="lock-shield">
+      <svg width="64" height="72" viewBox="0 0 64 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M32 2L4 14v20c0 22 12 36 28 40C48 70 60 56 60 34V14L32 2z" fill="rgba(204,0,0,.07)" stroke="rgba(204,0,0,.5)" stroke-width="1.4"/>
+        <path d="M32 8L10 18v16c0 18 9.5 29.5 22 33C44.5 63.5 54 52 54 34V18L32 8z" fill="none" stroke="rgba(204,0,0,.2)" stroke-width=".8"/>
+        <!-- Lock icon in shield -->
+        <rect x="23" y="32" width="18" height="14" rx="2" fill="rgba(204,0,0,.25)" stroke="#cc0000" stroke-width="1.2"/>
+        <path d="M26 32v-4a6 6 0 0112 0v4" stroke="#cc0000" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        <circle cx="32" cy="38.5" r="2" fill="#ffaa00"/>
+        <line x1="32" y1="40.5" x2="32" y2="43" stroke="#ffaa00" stroke-width="1.4" stroke-linecap="round"/>
+        <!-- Sri Lanka star/dots -->
+        <circle cx="32" cy="16" r="2" fill="#ffaa00" opacity=".7"/>
+        <circle cx="26" cy="19" r="1.2" fill="rgba(255,170,0,.4)"/>
+        <circle cx="38" cy="19" r="1.2" fill="rgba(255,170,0,.4)"/>
+      </svg>
+    </div>
+    <div class="lock-agency">Sri Lanka Police · Child Safety Reporter</div>
+    <div class="lock-title">SECURE ACCESS</div>
+    <div class="lock-sub">// AUTHORISED PERSONNEL ONLY //</div>
+    <div class="lock-input-wrap">
+      <input
+        type="password"
+        id="lockInput"
+        placeholder="Enter passcode..."
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        onkeydown="lockKeyDown(event)"
+      >
+    </div>
+    <button id="lockBtn" onclick="checkPasscode()">
+      ▶ &nbsp; AUTHENTICATE &nbsp; ▶
+    </button>
+    <div id="lockErr"></div>
+    <div class="lock-attempts">ATTEMPTS REMAINING: <span id="lockTries">5</span></div>
+    <div class="lock-footer">
+      CHILD SAFETY REPORTER // SECURE NETWORK<br>
+      UNAUTHORISED ACCESS IS A CRIMINAL OFFENCE<br>
+      ALL ACCESS ATTEMPTS ARE LOGGED &amp; MONITORED
+    </div>
+  </div>
+</div>
+
+<div id="pageContent" aria-hidden="true"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* SAFE STORAGE */
+var ls={get:function(k){try{return localStorage.getItem(k)}catch(e){return null}},set:function(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+/* ============================================================
+   PAGE INIT — called after HTML is injected post-unlock
+   ============================================================ */
+function initPage(){
+
+/* MATRIX RAIN */
+try{
+  var cv=document.getElementById('rain');
+  var cx=cv.getContext('2d');
+  var CH='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+[]{}|';
+  var FS=13,drops=[];
+  function resz(){cv.width=window.innerWidth;cv.height=window.innerHeight;drops=Array(Math.floor(cv.width/FS)).fill(1)}
+  resz();window.addEventListener('resize',resz);
+  setInterval(function(){
+    cx.fillStyle='rgba(0,0,0,0.06)';cx.fillRect(0,0,cv.width,cv.height);
+    cx.font=FS+'px monospace';
+    for(var i=0;i<drops.length;i++){
+      var c=CH[Math.floor(Math.random()*CH.length)];
+      var r=Math.random();
+      cx.fillStyle=r>.98?'#ffaa00':r>.9?'#cc0000':'#3a0000';
+      cx.fillText(c,i*FS,drops[i]*FS);
+      if(drops[i]*FS>cv.height&&Math.random()>.975)drops[i]=0;
+      drops[i]++;
+    }
+  },45);
+}catch(e){}
+
+/* NAV */
+window.toggleNav=function(){
+  var nav=document.getElementById('mobnav');
+  var btn=document.getElementById('hambtn');
+  var open=nav.classList.toggle('open');
+  if(btn)btn.setAttribute('aria-expanded',open?'true':'false');
+};
+
+/* SMOOTH SCROLL */
+document.querySelectorAll('a[href^="#"]').forEach(function(a){
+  a.addEventListener('click',function(e){
+    var t=document.querySelector(this.getAttribute('href'));
+    if(t){e.preventDefault();window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-60,behavior:'smooth'});var mn=document.getElementById('mobnav');if(mn)mn.classList.remove('open');}
+  });
+});
+
+/* ANON TOGGLE */
+var anonOn=true;
+window.toggleAnon=function(){
+  anonOn=!anonOn;
+  var tog=document.getElementById('anontog');
+  var lbl=document.getElementById('anonlabel');
+  var cf=document.getElementById('cfield');
+  if(anonOn){tog.classList.remove('off');lbl.textContent='ANONYMOUS MODE — ENABLED';lbl.style.color='';if(cf)cf.style.display='none';}
+  else{tog.classList.add('off');lbl.textContent='ANONYMOUS MODE — DISABLED';lbl.style.color='#ffaa00';if(cf)cf.style.display='block';}
+};
+
+/* FILE UPLOAD */
+window.fileChosen=function(inp){
+  if(inp.files&&inp.files[0]){
+    var z=inp.closest('.upload-zone');
+    if(z){var t=z.querySelector('.upload-txt');if(t)t.innerHTML='<strong>✓ '+inp.files[0].name+' loaded</strong>';z.style.borderColor='var(--amber)';}
+  }
+};
+try{
+  var zone=document.querySelector('.upload-zone');
+  if(zone){
+    zone.addEventListener('dragover',function(e){e.preventDefault();zone.style.borderColor='var(--red)'});
+    zone.addEventListener('dragleave',function(){zone.style.borderColor=''});
+    zone.addEventListener('drop',function(e){
+      e.preventDefault();var f=e.dataTransfer.files[0];
+      if(f){var t=zone.querySelector('.upload-txt');if(t)t.innerHTML='<strong>✓ '+f.name+' loaded</strong>';zone.style.borderColor='var(--amber)';}
+    });
+  }
+}catch(e){}
+
+/* FORM SUBMIT */
+window.submitForm=function(e){
+  e.preventDefault();
+  var form=document.getElementById('rform');
+  var ok=document.getElementById('okbox');
+  var ref=document.getElementById('refcode');
+  if(ref)ref.textContent='#CSR-'+Date.now().toString(36).toUpperCase()+Math.random().toString(36).substr(2,4).toUpperCase();
+  if(form){form.style.opacity='.35';form.style.pointerEvents='none';}
+  if(ok){ok.classList.add('show');ok.scrollIntoView({behavior:'smooth',block:'center'});}
+};
+
+/* SCROLL ANIMATIONS */
+try{
+  var ob=new IntersectionObserver(function(entries){
+    entries.forEach(function(en){if(en.isIntersecting){en.target.style.opacity='1';en.target.style.transform='translateY(0)'}});
+  },{threshold:.08});
+  document.querySelectorAll('.org-card,.edu-card,.priv-item').forEach(function(el){
+    el.style.opacity='0';el.style.transform='translateY(16px)';el.style.transition='opacity .45s ease,transform .45s ease';ob.observe(el);
+  });
+}catch(e){}
+
+/* MOOD PLAYER */
+var tracks={sad:{url:'https://youtu.be/XTUpbWYq-BE?list=RDMMkiYpbqpVN3o',name:'Sad Mode — Track 1',sub:'YouTube · Melancholic'},agg:{url:'https://youtu.be/kiYpbqpVN3o?list=RDMMkiYpbqpVN3o',name:'Aggressive Mode — Track 2',sub:'YouTube · High Energy'}};
+var mood='sad';
+window.setMood=function(m){
+  mood=m;
+  document.getElementById('tname').textContent=tracks[m].name;
+  document.getElementById('tsub').textContent=tracks[m].sub;
+  document.getElementById('msad').className='mmode'+(m==='sad'?' a-sad':'');
+  document.getElementById('magg').className='mmode'+(m==='agg'?' a-agg':'');
+};
+window.playTrack=function(){window.open(tracks[mood].url,'_blank')};
+
+/* EYE COMFORT */
+window.toggleEC=function(){
+  var on=document.body.classList.toggle('ec');
+  var btn=document.getElementById('eyebtn');
+  if(btn)btn.textContent=on?'🔴 HIRUZICK MODE':'👁 EYE COMFORT';
+  ls.set('ec',on?'1':'0');
+};
+if(ls.get('ec')==='1'){document.body.classList.add('ec');var eb=document.getElementById('eyebtn');if(eb)eb.textContent='🔴 HIRUZICK MODE';}
+
+} /* end initPage */
+
+/* ============================================================
+   CONTENT PROTECTION — RIGHT CLICK / COPY / INSPECT DISABLED
+   ============================================================ */
+
+/* 1. Right-click context menu */
+document.addEventListener('contextmenu',function(e){
+  e.preventDefault();
+  showProtectToast();
+  return false;
+});
+
+/* 2. Copy / Cut */
+document.addEventListener('copy',function(e){e.preventDefault();showProtectToast();return false;});
+document.addEventListener('cut',function(e){e.preventDefault();showProtectToast();return false;});
+
+/* 3. Text selection disable via CSS (injected) */
+var noSelectStyle=document.createElement('style');
+noSelectStyle.textContent='*{-webkit-user-select:none!important;-moz-user-select:none!important;-ms-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important}input,textarea{-webkit-user-select:text!important;-moz-user-select:text!important;user-select:text!important}';
+document.head.appendChild(noSelectStyle);
+
+/* 4. Drag protection */
+document.addEventListener('dragstart',function(e){e.preventDefault();return false;});
+
+/* 5. Keyboard shortcuts — F12, Ctrl+U, Ctrl+Shift+I/J/C, Ctrl+S, Ctrl+A */
+document.addEventListener('keydown',function(e){
+  var k=e.key||e.keyCode;
+  /* F12 */
+  if(k==='F12'||k===123){e.preventDefault();showProtectToast();return false;}
+  if(e.ctrlKey||e.metaKey){
+    var key=(k+'').toLowerCase();
+    /* Ctrl+U (view source), Ctrl+S (save), Ctrl+A (select all) */
+    if(key==='u'||key==='s'||key==='a'){e.preventDefault();showProtectToast();return false;}
+    /* Ctrl+Shift+I / J / C (devtools) */
+    if(e.shiftKey&&(key==='i'||key==='j'||key==='c')){e.preventDefault();showProtectToast();return false;}
+    /* Ctrl+P (print) */
+    if(key==='p'){e.preventDefault();showProtectToast();return false;}
+  }
+  /* Alt+F4 — allow, don't block OS shortcuts */
+});
+
+/* 6. Print */
+window.onbeforeprint=function(){
+  document.body.innerHTML='<div style="font-family:monospace;padding:3rem;text-align:center;font-size:1.2rem;">⛔ PRINTING DISABLED — CHILD SAFETY REPORTER // PROTECTED CONTENT</div>';
+};
+
+/* 7. Devtools size-change detection (basic) */
+(function devDetect(){
+  var threshold=160;
+  setInterval(function(){
+    if(window.outerWidth-window.innerWidth>threshold||window.outerHeight-window.innerHeight>threshold){
+      document.body.style.filter='blur(8px)';
+      showProtectToast('⚠ DEV TOOLS DETECTED — CONTENT BLURRED');
+    } else {
+      document.body.style.filter='';
+    }
+  },1200);
+})();
+
+/* 8. Toast notification */
+var toastTimer=null;
+function showProtectToast(msg){
+  var t=document.getElementById('protectToast');
+  if(!t){
+    t=document.createElement('div');
+    t.id='protectToast';
+    t.style.cssText='position:fixed;top:72px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(0,0,0,.95);border:1px solid #cc0000;color:#cc4422;font-family:"Share Tech Mono",monospace;font-size:.72rem;letter-spacing:.12em;padding:.7rem 1.6rem;z-index:99999;pointer-events:none;opacity:0;transition:opacity .25s,transform .25s;box-shadow:0 0 20px rgba(204,0,0,.35);white-space:nowrap;';
+    document.body.appendChild(t);
+  }
+  t.textContent=msg||'⛔ CONTENT PROTECTED — UNAUTHORISED ACCESS DENIED';
+  t.style.opacity='1';
+  t.style.transform='translateX(-50%) translateY(0)';
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){
+    t.style.opacity='0';
+    t.style.transform='translateX(-50%) translateY(-20px)';
+  },2200);
+}
+
+/* ============================================================
+   PASSCODE LOCK SCREEN
+   ============================================================ */
+
+/* Page HTML — only injected after correct passcode */
+var _pageHTML = "<canvas id=\"rain\"></canvas>\n<button id=\"eyebtn\" onclick=\"toggleEC()\">\ud83d\udc41 EYE COMFORT</button>\n\n<!-- NAV -->\n<nav aria-label=\"Main navigation\">\n  <a href=\"#home\" class=\"logo\">\n    <svg width=\"34\" height=\"34\" viewBox=\"0 0 34 34\" fill=\"none\">\n      <path d=\"M17 2L3 8v9c0 8 5.5 15.5 14 17.5C25.5 32.5 31 25 31 17V8L17 2z\" fill=\"rgba(204,0,0,.06)\" stroke=\"#660000\" stroke-width=\"1.2\"/>\n      <path d=\"M11 17l4 4 8-8\" stroke=\"#cc0000\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n      <circle cx=\"17\" cy=\"11\" r=\"2.5\" fill=\"#ffaa00\" opacity=\".7\"/>\n    </svg>\n    <div class=\"logo-text\">CHILD SAFETY<br><em>REPORTER</em></div>\n  </a>\n  <ul class=\"nav-links\">\n    <li><a href=\"#home\">HOME</a></li>\n    <li><a href=\"#report\">REPORT</a></li>\n    <li><a href=\"#emergency\">EMERGENCY</a></li>\n    <li><a href=\"#education\">EDUCATION</a></li>\n    <li><a href=\"#privacy\">PRIVACY</a></li>\n    <li><a href=\"#report\" class=\"nav-cta\">\u26a0 REPORT NOW</a></li>\n  </ul>\n  <button class=\"hamburger\" onclick=\"toggleNav()\" aria-label=\"Toggle mobile menu\" aria-expanded=\"false\" id=\"hambtn\">\n    <span></span><span></span><span></span>\n  </button>\n</nav>\n<div class=\"mob-nav\" id=\"mobnav\">\n  <a href=\"#home\" onclick=\"toggleNav()\">HOME</a>\n  <a href=\"#report\" onclick=\"toggleNav()\">REPORT ABUSE</a>\n  <a href=\"#emergency\" onclick=\"toggleNav()\">EMERGENCY</a>\n  <a href=\"#education\" onclick=\"toggleNav()\">EDUCATION</a>\n  <a href=\"#privacy\" onclick=\"toggleNav()\">PRIVACY</a>\n</div>\n\n<!-- HERO -->\n<section id=\"home\">\n  <div class=\"hero-grid\"></div>\n  <div class=\"corner c-tl\"></div><div class=\"corner c-tr\"></div>\n  <div class=\"corner c-bl\"></div><div class=\"corner c-br\"></div>\n  <div class=\"hero-inner\">\n    <div class=\"hero-tag\">MISSION CRITICAL \u2014 CHILD PROTECTION NETWORK</div>\n    <h1 class=\"hero-title\">PROTECT<br>CHILDREN.<br><span class=\"amber\">REPORT ABUSE.</span></h1>\n    <div class=\"hero-sub\">// STOP EXPLOITATION ONLINE</div>\n    <p class=\"hero-desc\">Every report matters. If you've encountered suspected child sexual abuse material or online exploitation \u2014 you have the power and the responsibility to act. Reports are encrypted and forwarded directly to law enforcement worldwide.</p>\n    <div class=\"hero-btns\">\n      <a href=\"#report\" class=\"btn-red\">\n        <svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\"><path d=\"M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z\"/><line x1=\"12\" y1=\"9\" x2=\"12\" y2=\"13\"/><line x1=\"12\" y1=\"17\" x2=\"12.01\" y2=\"17\"/></svg>\n        REPORT SUSPECTED ABUSE\n      </a>\n      <a href=\"#emergency\" class=\"btn-ghost\">\n        <svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.12 1.27 2 2 0 012.11.09h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z\"/></svg>\n        EMERGENCY HOTLINES\n      </a>\n    </div>\n    <div class=\"hero-stats\">\n      <div class=\"stat\"><div class=\"stat-n\">24/7</div><div class=\"stat-l\">Reports Forwarded</div></div>\n      <div class=\"stat\"><div class=\"stat-n\">100%</div><div class=\"stat-l\">Anonymous Option</div></div>\n      <div class=\"stat\"><div class=\"stat-n\">50+</div><div class=\"stat-l\">Partner Agencies</div></div>\n    </div>\n  </div>\n</section>\n\n<!-- TICKER -->\n<div class=\"ticker-wrap\">\n  <div class=\"ticker-inner\">\u26a0 HOSTING OR SHARING CHILD SEXUAL ABUSE MATERIAL IS A FEDERAL CRIME &nbsp;|&nbsp; OFFENDERS FACE MANDATORY IMPRISONMENT &nbsp;|&nbsp; LAW ENFORCEMENT ACTIVELY MONITORS ONLINE ACTIVITY &nbsp;|&nbsp; REPORT SUSPICIOUS CONTENT IMMEDIATELY &nbsp;|&nbsp; ALL REPORTS ARE CONFIDENTIAL &nbsp;|&nbsp; \u26a0 HOSTING OR SHARING CHILD SEXUAL ABUSE MATERIAL IS A FEDERAL CRIME &nbsp;|&nbsp; OFFENDERS FACE MANDATORY IMPRISONMENT &nbsp;|&nbsp; LAW ENFORCEMENT ACTIVELY MONITORS &nbsp;|&nbsp;</div>\n</div>\n\n<!-- WARNING -->\n<div class=\"warn-bar\">\n  <svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#ffaa00\" stroke-width=\"2\">\n    <path d=\"M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z\"/>\n    <line x1=\"12\" y1=\"9\" x2=\"12\" y2=\"13\"/><line x1=\"12\" y1=\"17\" x2=\"12.01\" y2=\"17\"/>\n  </svg>\n  <div>\n    <div class=\"warn-title\">\u26a0 LEGAL WARNING \u2014 FEDERAL CRIME</div>\n    <div class=\"warn-text\">The production, possession, distribution, or viewing of child sexual abuse material (CSAM) is a serious federal and international crime. Offenders face severe criminal prosecution, mandatory imprisonment, and lifetime sex offender registration. Law enforcement agencies actively monitor and investigate online activity related to child exploitation.</div>\n  </div>\n</div>\n\n<!-- REPORT FORM -->\n<section id=\"report\">\n  <div class=\"sec-tag\">SECURE REPORTING</div>\n  <h2 class=\"sec-title\">REPORT SUSPECTED ABUSE</h2>\n  <p class=\"sec-desc\">Your report is encrypted and forwarded directly to law enforcement and child protection authorities. Identity is never required.</p>\n  <div class=\"form-box\">\n    <div class=\"form-head\">\n      <div class=\"f-dots\"><div class=\"fd fd-r\"></div><div class=\"fd fd-a\"></div><div class=\"fd fd-d\"></div></div>\n      <div class=\"form-title\">// SECURE REPORT TERMINAL \u2014 AES-256 ENCRYPTED</div>\n    </div>\n    <div class=\"enc-badge\">\ud83d\udd12 ENCRYPTED &amp; SECURE SUBMISSION</div>\n    <div class=\"anon-row\" onclick=\"toggleAnon()\">\n      <div class=\"tog\" id=\"anontog\"></div>\n      <div class=\"anon-label\">\n        <strong id=\"anonlabel\">ANONYMOUS MODE \u2014 ENABLED</strong>\n        <span>Your identity will not be recorded or stored</span>\n      </div>\n    </div>\n    <form id=\"rform\" onsubmit=\"submitForm(event)\" class=\"fgrid\">\n      <div class=\"field\">\n        <label>WEBSITE URL / LINK <span class=\"req\">*</span></label>\n        <input type=\"url\" placeholder=\"https://example.com/suspicious-content\" required>\n      </div>\n      <div class=\"frow\">\n        <div class=\"field\">\n          <label>PLATFORM / SOURCE <span class=\"req\">*</span></label>\n          <select required>\n            <option value=\"\" disabled selected>Select platform...</option>\n            <option>Telegram</option><option>Website / URL</option>\n            <option>Facebook</option><option>Instagram</option>\n            <option>X / Twitter</option><option>TikTok</option>\n            <option>Discord</option><option>Dark Web / Tor</option>\n            <option>Email / Message</option><option>File Sharing Service</option>\n            <option>Gaming Platform</option><option>Other</option>\n          </select>\n        </div>\n        <div class=\"field\">\n          <label>TYPE OF CONTENT <span class=\"req\">*</span></label>\n          <select required>\n            <option value=\"\" disabled selected>Select type...</option>\n            <option>Child Sexual Abuse Material (CSAM)</option>\n            <option>Child Grooming / Solicitation</option>\n            <option>Child Trafficking</option>\n            <option>Inappropriate Contact with Minor</option>\n            <option>Live Streaming Abuse</option>\n            <option>Sextortion of Minor</option>\n            <option>Other Exploitation</option>\n          </select>\n        </div>\n      </div>\n      <div class=\"frow\">\n        <div class=\"field\">\n          <label>TELEGRAM GROUP OWNER ID</label>\n          <input type=\"text\" placeholder=\"@username or numeric ID e.g. 123456789\">\n        </div>\n        <div class=\"field\">\n          <label>TELEGRAM GROUP NAME / LINK</label>\n          <input type=\"text\" placeholder=\"t.me/groupname or group title\">\n        </div>\n      </div>\n      <div class=\"field\">\n        <label>DESCRIPTION OF INCIDENT <span class=\"req\">*</span></label>\n        <textarea placeholder=\"Describe what you observed \u2014 usernames, dates, times, platform details. Do NOT reproduce illegal content.\" required></textarea>\n      </div>\n      <div class=\"field\">\n        <label>SCREENSHOT EVIDENCE (Optional \u2014 no illegal content)</label>\n        <div class=\"upload-zone\" onclick=\"document.getElementById('fup').click()\">\n          <input type=\"file\" id=\"fup\" accept=\".png,.jpg,.jpeg,.pdf\" onchange=\"fileChosen(this)\">\n          <div class=\"upload-txt\"><strong>Click to upload</strong> or drag and drop</div>\n          <div class=\"upload-note\">PNG / JPG / PDF \u2014 Max 10MB. Screenshots of usernames or profiles only.</div>\n        </div>\n      </div>\n      <div class=\"field contact-field\" id=\"cfield\">\n        <label>CONTACT EMAIL (Optional \u2014 for follow-up only)</label>\n        <input type=\"email\" placeholder=\"your@email.com\">\n      </div>\n      <div class=\"form-foot\">\n        <div class=\"form-legal\">By submitting, you confirm this is a good-faith report. Deliberately false reports may constitute a criminal offense.</div>\n        <button type=\"submit\" class=\"btn-red\">\n          <svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\"><line x1=\"22\" y1=\"2\" x2=\"11\" y2=\"13\"/><polygon points=\"22 2 15 22 11 13 2 9 22 2\"/></svg>\n          SUBMIT SECURELY\n        </button>\n      </div>\n    </form>\n    <div class=\"success\" id=\"okbox\" role=\"alert\" aria-live=\"assertive\">\n      <h3>\u2713 REPORT SUBMITTED</h3>\n      <p>Encrypted and forwarded to relevant authorities. Reference: <strong id=\"refcode\" style=\"font-family:var(--M)\"></strong></p>\n    </div>\n  </div>\n</section>\n\n<!-- EMERGENCY -->\n<section id=\"emergency\">\n  <div class=\"sec-tag\">EMERGENCY RESOURCES</div>\n  <h2 class=\"sec-title\">OFFICIAL REPORTING AGENCIES</h2>\n  <p class=\"sec-desc\">Contact these organizations directly for urgent matters. All agencies handle reports with strict confidentiality.</p>\n  <div class=\"org-grid\">\n    <div class=\"org-card hot\">\n      <div class=\"org-flag\">\ud83c\uddf1\ud83c\uddf0</div><div class=\"org-name\">Sri Lanka Police \u2014 CID</div>\n      <div class=\"org-region\">Sri Lanka \u2014 Criminal Investigations</div>\n      <div class=\"org-desc\">Sri Lanka Police Criminal Investigation Department handles online child exploitation reports and coordinates with international agencies.</div>\n      <div class=\"org-links\"><a href=\"https://www.police.lk\" target=\"_blank\" class=\"org-a\">\ud83c\udf10 police.lk</a><a href=\"tel:0112421111\" class=\"org-a hl\">\ud83d\udcde 011 242 1111</a></div>\n    </div>\n    <div class=\"org-card hot\">\n      <div class=\"org-flag\">\ud83c\uddf1\ud83c\uddf0</div><div class=\"org-name\">Sri Lanka Army</div>\n      <div class=\"org-region\">Sri Lanka \u2014 Defence</div>\n      <div class=\"org-desc\">Sri Lanka Army supports national child protection initiatives and works alongside police and civil authorities on exploitation cases.</div>\n      <div class=\"org-links\"><a href=\"https://www.army.lk\" target=\"_blank\" class=\"org-a\">\ud83c\udf10 army.lk</a></div>\n    </div>\n    <div class=\"org-card hot\">\n      <div class=\"org-flag\">\ud83c\uddfa\ud83c\uddf8</div><div class=\"org-name\">NCMEC CyberTipline</div>\n      <div class=\"org-region\">United States \u2014 Primary Reporting</div>\n      <div class=\"org-desc\">Federally mandated CyberTipline. All US CSAM reports are legally required to be forwarded here.</div>\n      <div class=\"org-links\"><a href=\"https://www.cybertipline.org\" target=\"_blank\" class=\"org-a\">\ud83c\udf10 cybertipline.org</a><a href=\"tel:18008435678\" class=\"org-a hl\">\ud83d\udcde 1-800-843-5678</a></div>\n    </div>\n    <div class=\"org-card hot\">\n      <div class=\"org-flag\">\ud83c\udf0d</div><div class=\"org-name\">Internet Watch Foundation</div>\n      <div class=\"org-region\">United Kingdom / Global</div>\n      <div class=\"org-desc\">IWF removes CSAM from the internet globally and accepts reports from anywhere in the world.</div>\n      <div class=\"org-links\"><a href=\"https://www.iwf.org.uk/report\" target=\"_blank\" class=\"org-a\">\ud83c\udf10 iwf.org.uk/report</a></div>\n    </div>\n    <div class=\"org-card\">\n      <div class=\"org-flag\">\ud83c\uddfa\ud83c\uddf8</div><div class=\"org-name\">FBI \u2014 Internet Crime (IC3)</div>\n      <div class=\"org-region\">United States \u2014 Federal</div>\n      <div class=\"org-desc\">FBI Internet Crime Complaint Center investigates online child exploitation and coordinates with Interpol.</div>\n      <div class=\"org-links\"><a href=\"https://www.ic3.gov\" target=\"_blank\" class=\"org-a\">\ud83c\udf10 ic3.gov</a><a href=\"https://tips.fbi.gov\" target=\"_blank\" class=\"org-a\">\ud83c\udf10 tips.fbi.gov</a></div>\n    </div>\n    <div class=\"org-card\">\n      <div class=\"org-flag\">\ud83c\udf10</div><div class=\"org-name\">Interpol \u2014 Crimes Against Children</div>\n      <div class=\"org-region\">International \u2014 195 Countries</div>\n      <div class=\"org-desc\">Interpol coordinates global law enforcement and operates the ICSE database.</div>\n      <div class=\"org-links\"><a href=\"https://www.interpol.int/Crimes/Crimes-against-children\" target=\"_blank\" class=\"org-a\">\ud83c\udf10 interpol.int</a></div>\n    </div>\n    <div class=\"org-card\">\n      <div class=\"org-flag\">\ud83c\uddec\ud83c\udde7</div><div class=\"org-name\">CEOP \u2014 Child Exploitation Online</div>\n      <div class=\"org-region\">United Kingdom \u2014 NCA</div>\n      <div class=\"org-desc\">UK national policing command. Report online grooming and abuse directly to CEOP.</div>\n      <div class=\"org-links\"><a href=\"https://www.ceop.police.uk/safety-centre\" target=\"_blank\" class=\"org-a\">\ud83c\udf10 ceop.police.uk</a></div>\n    </div>\n    <div class=\"org-card\">\n      <div class=\"org-flag\">\ud83c\udde6\ud83c\uddfa</div><div class=\"org-name\">Australian Federal Police</div>\n      <div class=\"org-region\">Australia \u2014 ThinkUKnow</div>\n      <div class=\"org-desc\">AFP's ACCCE unit investigates online child sexual exploitation and accepts Australian reports.</div>\n      <div class=\"org-links\"><a href=\"https://www.afp.gov.au/report-cybercrime\" target=\"_blank\" class=\"org-a\">\ud83c\udf10 afp.gov.au</a></div>\n    </div>\n    <div class=\"org-card\">\n      <div class=\"org-flag\">\ud83c\udde8\ud83c\udde6</div><div class=\"org-name\">Cybertip.ca \u2014 Canada</div>\n      <div class=\"org-region\">Canada \u2014 Reporting Hotline</div>\n      <div class=\"org-desc\">Canada's national tipline for reporting online sexual exploitation of children.</div>\n      <div class=\"org-links\"><a href=\"https://www.cybertip.ca\" target=\"_blank\" class=\"org-a\">\ud83c\udf10 cybertip.ca</a><a href=\"tel:18004768800\" class=\"org-a hl\">\ud83d\udcde 1-800-476-8800</a></div>\n    </div>\n    <div class=\"org-card\">\n      <div class=\"org-flag\">\ud83c\udf0d</div><div class=\"org-name\">UNICEF \u2014 Child Protection</div>\n      <div class=\"org-region\">Global \u2014 Child Welfare</div>\n      <div class=\"org-desc\">UNICEF's global network connects you with local child protection resources in your country.</div>\n      <div class=\"org-links\"><a href=\"https://www.unicef.org/end-violence\" target=\"_blank\" class=\"org-a\">\ud83c\udf10 unicef.org</a></div>\n    </div>\n  </div>\n</section>\n\n<!-- EDUCATION -->\n<section id=\"education\">\n  <div class=\"sec-tag\">KNOW THE SIGNS</div>\n  <h2 class=\"sec-title\">RECOGNIZE &amp; PREVENT EXPLOITATION</h2>\n  <p class=\"sec-desc\">Understanding how online exploitation happens is the first line of defense for protecting children.</p>\n  <div class=\"edu-grid\">\n    <div class=\"edu-card\"><div class=\"edu-n\">01</div><h3>Online Grooming</h3><p>Grooming is when an adult builds trust with a child online with intent to exploit them sexually. It happens gradually through games, social media, or messaging \u2014 disguised as friendship.</p></div>\n    <div class=\"edu-card\"><div class=\"edu-n\">02</div><h3>Protecting Children Online</h3><p>Enable parental controls on all devices. Have open conversations about online safety. Know what platforms your children use and set rules about sharing personal information.</p></div>\n    <div class=\"edu-card\"><div class=\"edu-n\">03</div><h3>Sextortion</h3><p>Sextortion occurs when someone threatens to share intimate images of a minor unless demands are met. This growing crime affects children aged 10\u201317. Immediate reporting is critical.</p></div>\n    <div class=\"edu-card\"><div class=\"edu-n\">04</div><h3>Understanding CSAM</h3><p>Child Sexual Abuse Material is any content that sexually depicts a minor. Viewing, sharing, storing or producing it is a serious criminal offense globally \u2014 including illustrated or AI-generated content.</p></div>\n    <div class=\"edu-card\"><div class=\"edu-n\">05</div><h3>Reporting Is Mandatory</h3><p>In many jurisdictions discovering child abuse material creates a legal reporting obligation. Do NOT download or preserve material \u2014 note the URL and platform, then report immediately.</p></div>\n    <div class=\"edu-card\"><div class=\"edu-n\">06</div><h3>Talk to Children</h3><p>Trusted adults never ask children for secrets, photos, or personal information online. If anything makes them uncomfortable online, they can tell a trusted adult without fear. Safety first.</p></div>\n  </div>\n  <div class=\"signs-box\">\n    <div class=\"signs-title\">\u26a0 WARNING SIGNS A CHILD MAY BE AT RISK</div>\n    <div class=\"signs-grid\">\n      <div class=\"sign\">Becoming secretive about online activities or hiding their screen</div>\n      <div class=\"sign\">Unexplained gifts, money, or new devices from unknown sources</div>\n      <div class=\"sign\">Switching apps or closing browser quickly when adults approach</div>\n      <div class=\"sign\">Withdrawal from family, friends, or regular activities</div>\n      <div class=\"sign\">Emotional distress or mood changes after online use</div>\n      <div class=\"sign\">Using devices secretly late at night or in hidden locations</div>\n      <div class=\"sign\">Mentioning new older friends met online they're reluctant to discuss</div>\n      <div class=\"sign\">Unexplained knowledge of sexual topics beyond their age</div>\n    </div>\n  </div>\n</section>\n\n<!-- PRIVACY -->\n<section id=\"privacy\">\n  <div class=\"sec-tag\">SYSTEM TRANSPARENCY</div>\n  <h2 class=\"sec-title\">PRIVACY &amp; SAFETY PROTOCOL</h2>\n  <p class=\"sec-desc\">Full transparency on how your report is handled, encrypted, and processed by authorities.</p>\n  <div class=\"priv-grid\">\n    <div class=\"priv-item\"><div class=\"priv-n\">01</div><div><h3>No Illegal Content Stored</h3><p>This platform never stores, hosts, or displays CSAM. All uploads are scanned using PhotoDNA hash-matching. Illegal content is blocked and the attempt automatically reported to law enforcement.</p></div></div>\n    <div class=\"priv-item\"><div class=\"priv-n\">02</div><div><h3>End-to-End Encryption</h3><p>All reports are transmitted using TLS 1.3 and stored with AES-256 encryption. Only authorized law enforcement partners can access submitted reports. Anonymous submissions use zero-knowledge architecture.</p></div></div>\n    <div class=\"priv-item\"><div class=\"priv-n\">03</div><div><h3>Anonymous Reporting Guaranteed</h3><p>When anonymous mode is enabled, no identifying information is collected. IP addresses are never logged for anonymous submissions. Your identity is never shared except as required by law.</p></div></div>\n    <div class=\"priv-item\"><div class=\"priv-n\">04</div><div><h3>Direct Law Enforcement Routing</h3><p>Every report is forwarded to NCMEC, IWF, national cybercrime units, and international law enforcement. Reports are triaged by urgency and jurisdiction for the fastest possible response.</p></div></div>\n    <div class=\"priv-item\"><div class=\"priv-n\">05</div><div><h3>Data Retention Policy</h3><p>Report data retained for 7 years per law enforcement agreements, then permanently deleted. Anonymous reports contain zero personal identifiers. Full GDPR and COPPA compliance maintained.</p></div></div>\n    <div class=\"priv-item\"><div class=\"priv-n\">06</div><div><h3>Good Faith Protection</h3><p>Reporting in good faith is legally protected in most jurisdictions. You cannot be held liable for reporting content you genuinely believed to be illegal. False reports may constitute a criminal offense.</p></div></div>\n  </div>\n</section>\n\n<!-- MUSIC PLAYER -->\n<div id=\"music\">\n  <div class=\"music-head\">\n    <span class=\"music-label\">// MOOD PLAYER</span>\n    <button class=\"music-close\" onclick=\"document.getElementById('music').style.display='none'\">\u2715</button>\n  </div>\n  <div class=\"music-modes\">\n    <button class=\"mmode a-sad\" id=\"msad\" onclick=\"setMood('sad')\">\ud83d\ude22 SAD</button>\n    <button class=\"mmode\" id=\"magg\" onclick=\"setMood('agg')\">\ud83d\ude24 AGGRESSIVE</button>\n  </div>\n  <div class=\"music-track\">\n    <div id=\"tname\">Sad Mode \u2014 Track 1</div>\n    <div id=\"tsub\">YouTube \u00b7 Melancholic</div>\n  </div>\n  <button class=\"music-play\" onclick=\"playTrack()\">\u25b6 PLAY ON YOUTUBE</button>\n  <div class=\"music-note\">Opens in new tab</div>\n</div>\n\n<!-- SPONSOR / PARTNER BAR -->\n<div class=\"sponsor-bar\">\n  <div class=\"sponsor-label\">IN PARTNERSHIP WITH</div>\n  <div class=\"sponsor-list\">\n\n    <!-- Sri Lanka Police -->\n    <div class=\"sponsor-item\" title=\"Sri Lanka Police\">\n      <div class=\"sponsor-logo\">\n        <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\" width=\"46\" height=\"46\">\n          <!-- Shield base -->\n          <path d=\"M50 4 L90 20 L90 52 C90 74 72 90 50 96 C28 90 10 74 10 52 L10 20 Z\" fill=\"rgba(0,30,100,0.85)\" stroke=\"#8899cc\" stroke-width=\"1.5\"/>\n          <!-- Inner shield highlight -->\n          <path d=\"M50 10 L84 24 L84 52 C84 70 68 84 50 90 C32 84 16 70 16 52 L16 24 Z\" fill=\"none\" stroke=\"rgba(136,153,204,0.3)\" stroke-width=\"0.8\"/>\n          <!-- Sri Lanka emblem - Lion silhouette (simplified) -->\n          <g transform=\"translate(50,50) scale(0.55)\">\n            <!-- Lion body -->\n            <ellipse cx=\"0\" cy=\"5\" rx=\"16\" ry=\"12\" fill=\"#cc9900\" opacity=\"0.9\"/>\n            <!-- Lion head -->\n            <circle cx=\"14\" cy=\"-4\" r=\"10\" fill=\"#cc9900\" opacity=\"0.9\"/>\n            <!-- Mane -->\n            <circle cx=\"14\" cy=\"-4\" r=\"12\" fill=\"none\" stroke=\"#ffcc00\" stroke-width=\"3\" opacity=\"0.7\"/>\n            <!-- Eye -->\n            <circle cx=\"17\" cy=\"-5\" r=\"2\" fill=\"#000\"/>\n            <!-- Sword (stylized) -->\n            <line x1=\"20\" y1=\"2\" x2=\"32\" y2=\"-12\" stroke=\"#ffcc00\" stroke-width=\"2.5\" stroke-linecap=\"round\"/>\n            <path d=\"M31,-13 L35,-9 L30,-8 Z\" fill=\"#ffcc00\"/>\n            <!-- Tail -->\n            <path d=\"M-15,0 C-22,-5 -24,-14 -18,-18\" fill=\"none\" stroke=\"#cc9900\" stroke-width=\"3\" stroke-linecap=\"round\" opacity=\"0.9\"/>\n            <!-- Paws -->\n            <ellipse cx=\"-6\" cy=\"16\" rx=\"5\" ry=\"3\" fill=\"#bb8800\" opacity=\"0.8\"/>\n            <ellipse cx=\"8\" cy=\"18\" rx=\"5\" ry=\"3\" fill=\"#bb8800\" opacity=\"0.8\"/>\n          </g>\n          <!-- Bottom text band -->\n          <rect x=\"18\" y=\"78\" width=\"64\" height=\"11\" rx=\"2\" fill=\"rgba(0,20,80,0.6)\"/>\n          <text x=\"50\" y=\"87\" text-anchor=\"middle\" font-family=\"serif\" font-size=\"5.5\" fill=\"#aabbee\" letter-spacing=\"0.5\">SRI LANKA POLICE</text>\n          <!-- Top stars -->\n          <text x=\"50\" y=\"20\" text-anchor=\"middle\" font-size=\"7\" fill=\"#ffcc00\" opacity=\"0.8\">\u2605 \u2605 \u2605</text>\n        </svg>\n      </div>\n      <div class=\"sponsor-name\">Sri Lanka Police</div>\n    </div>\n\n    <div class=\"sponsor-divider\"></div>\n\n    <!-- Sri Lanka Army -->\n    <div class=\"sponsor-item\" title=\"Sri Lanka Army\">\n      <div class=\"sponsor-logo\">\n        <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\" width=\"46\" height=\"46\">\n          <!-- Circular badge background -->\n          <circle cx=\"50\" cy=\"50\" r=\"46\" fill=\"rgba(60,20,0,0.7)\" stroke=\"#885533\" stroke-width=\"1.5\"/>\n          <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"none\" stroke=\"rgba(180,100,40,0.35)\" stroke-width=\"0.8\"/>\n          <!-- Crossed rifles (Army symbol) -->\n          <g stroke=\"#cc7700\" stroke-width=\"2.2\" stroke-linecap=\"round\" opacity=\"0.9\">\n            <!-- Rifle 1 (top-left to bottom-right) -->\n            <line x1=\"22\" y1=\"28\" x2=\"78\" y2=\"72\"/>\n            <rect x=\"19\" y=\"25\" width=\"14\" height=\"5\" rx=\"1\" fill=\"#aa6600\" transform=\"rotate(-35,26,27)\"/>\n            <line x1=\"72\" y1=\"70\" x2=\"80\" y2=\"76\" stroke-width=\"3\"/>\n            <!-- Rifle 2 (top-right to bottom-left) -->\n            <line x1=\"78\" y1=\"28\" x2=\"22\" y2=\"72\"/>\n            <rect x=\"67\" y=\"25\" width=\"14\" height=\"5\" rx=\"1\" fill=\"#aa6600\" transform=\"rotate(35,74,27)\"/>\n            <line x1=\"28\" y1=\"70\" x2=\"20\" y2=\"76\" stroke-width=\"3\"/>\n          </g>\n          <!-- Central lion emblem -->\n          <circle cx=\"50\" cy=\"50\" r=\"15\" fill=\"rgba(20,10,0,0.85)\" stroke=\"#885533\" stroke-width=\"1\"/>\n          <g transform=\"translate(50,50) scale(0.28)\">\n            <ellipse cx=\"0\" cy=\"6\" rx=\"18\" ry=\"14\" fill=\"#dd9900\"/>\n            <circle cx=\"16\" cy=\"-5\" r=\"11\" fill=\"#dd9900\"/>\n            <circle cx=\"16\" cy=\"-5\" r=\"13\" fill=\"none\" stroke=\"#ffbb00\" stroke-width=\"3.5\" opacity=\"0.75\"/>\n            <circle cx=\"19\" cy=\"-6\" r=\"2.5\" fill=\"#000\"/>\n            <line x1=\"22\" y1=\"2\" x2=\"36\" y2=\"-15\" stroke=\"#ffcc00\" stroke-width=\"3\" stroke-linecap=\"round\"/>\n            <path d=\"M35,-16 L40,-11 L34,-9 Z\" fill=\"#ffcc00\"/>\n            <path d=\"M-17,0 C-25,-6 -27,-16 -20,-20\" fill=\"none\" stroke=\"#dd9900\" stroke-width=\"3.5\" stroke-linecap=\"round\"/>\n          </g>\n          <!-- Wreath / laurel sides (simplified) -->\n          <g fill=\"none\" stroke=\"#886633\" stroke-width=\"1.2\" opacity=\"0.55\">\n            <path d=\"M16,50 C12,42 13,33 18,28\"/>\n            <path d=\"M14,50 C10,40 12,30 17,24\"/>\n            <path d=\"M84,50 C88,42 87,33 82,28\"/>\n            <path d=\"M86,50 C90,40 88,30 83,24\"/>\n          </g>\n          <!-- Top crown -->\n          <path d=\"M38,16 L42,10 L46,15 L50,8 L54,15 L58,10 L62,16 L58,19 L42,19 Z\" fill=\"#cc8800\" opacity=\"0.85\"/>\n          <!-- Bottom text -->\n          <path id=\"armyArc\" d=\"M 20,72 A 32,32 0 0,0 80,72\" fill=\"none\"/>\n          <text font-family=\"serif\" font-size=\"5.5\" fill=\"#cc9944\" letter-spacing=\"0.8\">\n            <textPath href=\"#armyArc\" startOffset=\"10%\">SRI LANKA ARMY</textPath>\n          </text>\n        </svg>\n      </div>\n      <div class=\"sponsor-name\">Sri Lanka Army</div>\n    </div>\n\n    <div class=\"sponsor-divider\"></div>\n\n    <!-- NCMEC -->\n    <div class=\"sponsor-item\" title=\"NCMEC \u2014 National Center for Missing & Exploited Children\">\n      <div class=\"sponsor-logo\">\n        <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\" width=\"46\" height=\"46\">\n          <rect x=\"5\" y=\"5\" width=\"90\" height=\"90\" rx=\"8\" fill=\"rgba(0,40,120,0.75)\" stroke=\"#3355aa\" stroke-width=\"1.5\"/>\n          <!-- Child silhouette -->\n          <circle cx=\"50\" cy=\"30\" r=\"11\" fill=\"#4488ff\" opacity=\"0.85\"/>\n          <path d=\"M32,70 C32,52 40,44 50,44 C60,44 68,52 68,70 Z\" fill=\"#4488ff\" opacity=\"0.85\"/>\n          <!-- Protective hands arc -->\n          <path d=\"M22,58 C22,35 78,35 78,58\" fill=\"none\" stroke=\"#ffcc00\" stroke-width=\"2.5\" stroke-linecap=\"round\" opacity=\"0.8\"/>\n          <text x=\"50\" y=\"87\" text-anchor=\"middle\" font-family=\"sans-serif\" font-size=\"6\" font-weight=\"bold\" fill=\"#6699ff\" letter-spacing=\"0.5\">NCMEC</text>\n        </svg>\n      </div>\n      <div class=\"sponsor-name\">NCMEC</div>\n    </div>\n\n    <div class=\"sponsor-divider\"></div>\n\n    <!-- IWF -->\n    <div class=\"sponsor-item\" title=\"Internet Watch Foundation\">\n      <div class=\"sponsor-logo\">\n        <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\" width=\"46\" height=\"46\">\n          <rect x=\"5\" y=\"5\" width=\"90\" height=\"90\" rx=\"8\" fill=\"rgba(0,60,30,0.75)\" stroke=\"#336644\" stroke-width=\"1.5\"/>\n          <!-- Globe -->\n          <circle cx=\"50\" cy=\"48\" r=\"28\" fill=\"none\" stroke=\"#44aa66\" stroke-width=\"1.8\" opacity=\"0.9\"/>\n          <ellipse cx=\"50\" cy=\"48\" rx=\"14\" ry=\"28\" fill=\"none\" stroke=\"#44aa66\" stroke-width=\"1.2\" opacity=\"0.6\"/>\n          <line x1=\"22\" y1=\"48\" x2=\"78\" y2=\"48\" stroke=\"#44aa66\" stroke-width=\"1.2\" opacity=\"0.6\"/>\n          <line x1=\"26\" y1=\"32\" x2=\"74\" y2=\"32\" stroke=\"#44aa66\" stroke-width=\"1\" opacity=\"0.4\"/>\n          <line x1=\"26\" y1=\"64\" x2=\"74\" y2=\"64\" stroke=\"#44aa66\" stroke-width=\"1\" opacity=\"0.4\"/>\n          <!-- Shield overlay -->\n          <path d=\"M50,22 L62,28 L62,40 C62,50 57,57 50,60 C43,57 38,50 38,40 L38,28 Z\" fill=\"rgba(68,170,102,0.25)\" stroke=\"#44aa66\" stroke-width=\"1.5\"/>\n          <text x=\"50\" y=\"87\" text-anchor=\"middle\" font-family=\"sans-serif\" font-size=\"6\" font-weight=\"bold\" fill=\"#55cc77\" letter-spacing=\"0.5\">IWF</text>\n        </svg>\n      </div>\n      <div class=\"sponsor-name\">Internet Watch Foundation</div>\n    </div>\n\n    <div class=\"sponsor-divider\"></div>\n\n    <!-- INTERPOL -->\n    <div class=\"sponsor-item\" title=\"Interpol\">\n      <div class=\"sponsor-logo\">\n        <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\" width=\"46\" height=\"46\">\n          <circle cx=\"50\" cy=\"50\" r=\"45\" fill=\"rgba(0,20,80,0.8)\" stroke=\"#2244aa\" stroke-width=\"1.5\"/>\n          <circle cx=\"50\" cy=\"50\" r=\"32\" fill=\"none\" stroke=\"#3355bb\" stroke-width=\"1.2\" opacity=\"0.5\"/>\n          <!-- Globe lines -->\n          <ellipse cx=\"50\" cy=\"50\" rx=\"18\" ry=\"32\" fill=\"none\" stroke=\"#3366cc\" stroke-width=\"1\" opacity=\"0.6\"/>\n          <ellipse cx=\"50\" cy=\"50\" rx=\"32\" ry=\"12\" fill=\"none\" stroke=\"#3366cc\" stroke-width=\"1\" opacity=\"0.4\"/>\n          <line x1=\"18\" y1=\"50\" x2=\"82\" y2=\"50\" stroke=\"#3366cc\" stroke-width=\"1\" opacity=\"0.4\"/>\n          <!-- Sword -->\n          <line x1=\"50\" y1=\"20\" x2=\"50\" y2=\"70\" stroke=\"#aabbff\" stroke-width=\"2.2\" stroke-linecap=\"round\" opacity=\"0.85\"/>\n          <path d=\"M44,26 L56,26\" stroke=\"#aabbff\" stroke-width=\"2\" stroke-linecap=\"round\" opacity=\"0.7\"/>\n          <path d=\"M47,70 L50,78 L53,70 Z\" fill=\"#aabbff\" opacity=\"0.85\"/>\n          <text x=\"50\" y=\"92\" text-anchor=\"middle\" font-family=\"sans-serif\" font-size=\"5.5\" font-weight=\"bold\" fill=\"#6688ee\" letter-spacing=\"0.5\">INTERPOL</text>\n        </svg>\n      </div>\n      <div class=\"sponsor-name\">Interpol</div>\n    </div>\n\n  </div>\n</div>\n\n<!-- FOOTER -->\n<footer>\n  <div>\n    <div class=\"foot-logo\">CHILD SAFETY <em>REPORTER</em></div>\n    <div class=\"foot-copy\">// IN PARTNERSHIP WITH SRI LANKA POLICE \u00b7 SRI LANKA ARMY \u00b7 NCMEC \u00b7 IWF \u00b7 INTERPOL // NOT A GOVERNMENT ENTITY</div>\n  </div>\n  <nav class=\"foot-nav\" aria-label=\"Footer navigation\">\n    <a href=\"#home\">HOME</a>\n    <a href=\"#report\">REPORT</a>\n    <a href=\"#emergency\">EMERGENCY</a>\n    <a href=\"#education\">EDUCATION</a>\n    <a href=\"#privacy\">PRIVACY</a>\n  </nav>\n</footer>";
+
+(function(){
+  var PASSCODE='SrilankaPoliceSFHIRUSHAN';
+  var maxTries=5;
+  var tries=0;
+  var locked=true;
+
+  /* Lock rain canvas */
+  try{
+    var lcv=document.getElementById('lockRain');
+    if(lcv){
+      var lcx=lcv.getContext('2d');
+      lcv.width=window.innerWidth;lcv.height=window.innerHeight;
+      window.addEventListener('resize',function(){lcv.width=window.innerWidth;lcv.height=window.innerHeight;});
+      var lCH='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%';
+      var lFS=12,lDrops=Array(Math.floor(lcv.width/lFS)).fill(1);
+      setInterval(function(){
+        lcx.fillStyle='rgba(0,0,0,0.07)';lcx.fillRect(0,0,lcv.width,lcv.height);
+        lcx.font=lFS+'px monospace';
+        for(var i=0;i<lDrops.length;i++){
+          var c=lCH[Math.floor(Math.random()*lCH.length)];
+          var r=Math.random();
+          lcx.fillStyle=r>.98?'#ffaa00':r>.88?'#660000':'#1a0000';
+          lcx.fillText(c,i*lFS,lDrops[i]*lFS);
+          if(lDrops[i]*lFS>lcv.height&&Math.random()>.975)lDrops[i]=0;
+          lDrops[i]++;
+        }
+      },50);
+    }
+  }catch(e){}
+
+  /* Focus input on load */
+  window.addEventListener('load',function(){
+    document.body.style.overflow='hidden';
+    var inp=document.getElementById('lockInput');
+    if(inp)setTimeout(function(){inp.focus();},300);
+  });
+
+  window.lockKeyDown=function(e){
+    if(e.key==='Enter')checkPasscode();
+  };
+
+  window.checkPasscode=function(){
+    if(!locked)return;
+    var inp=document.getElementById('lockInput');
+    var err=document.getElementById('lockErr');
+    var triesEl=document.getElementById('lockTries');
+    var btn=document.getElementById('lockBtn');
+    if(!inp)return;
+    var val=inp.value;
+
+    if(val===PASSCODE){
+      /* ✅ CORRECT */
+      locked=false;
+      inp.classList.add('locked-ok');
+      inp.value='';
+      inp.placeholder='✓ ACCESS GRANTED';
+      if(btn){btn.classList.add('unlocking');btn.textContent='✓  ACCESS GRANTED';}
+      if(err){err.style.color='#ffaa00';err.textContent='✓ IDENTITY VERIFIED — LOADING SECURE PORTAL...';}
+      /* Inject page content into DOM only after correct passcode */
+      var pc = document.getElementById('pageContent');
+      if(pc){
+        pc.innerHTML = _pageHTML;
+        pc.removeAttribute('aria-hidden');
+        pc.removeAttribute('style');
+        // Re-init page scripts that need DOM
+        initPage();
+      }
+      document.body.style.overflow='';
+      /* Fade out lockscreen */
+      setTimeout(function(){
+        var ls=document.getElementById('lockscreen');
+        if(ls){
+          ls.style.transition='opacity .6s ease';
+          ls.style.opacity='0';
+          setTimeout(function(){
+            ls.style.display='none';
+            ls.remove();
+          },620);
+        }
+      },900);
+    } else {
+      /* ❌ WRONG */
+      tries++;
+      var left=maxTries-tries;
+      if(triesEl)triesEl.textContent=Math.max(0,left);
+      inp.value='';
+      inp.classList.remove('shake');
+      void inp.offsetWidth; /* reflow to restart animation */
+      inp.classList.add('shake');
+      setTimeout(function(){inp.classList.remove('shake');},420);
+      if(left<=0){
+        /* Lockout */
+        inp.disabled=true;
+        if(btn){btn.disabled=true;btn.style.opacity='.35';btn.style.cursor='not-allowed';}
+        if(err)err.textContent='⛔ ACCESS LOCKED — MAX ATTEMPTS EXCEEDED';
+        document.getElementById('lockscreen').style.filter='blur(2px) brightness(.6)';
+      } else {
+        if(err)err.textContent='⛔ INVALID PASSCODE — '+left+' ATTEMPT'+(left===1?'':'S')+' REMAINING';
+        inp.focus();
+      }
+    }
+  };
+
+  /* Block all interaction with page behind lock */
+  document.addEventListener('keydown',function(e){
+    if(!locked)return;
+    /* Allow Tab/Enter/Backspace/typing inside lockscreen */
+    var active=document.activeElement;
+    if(active&&active.id==='lockInput')return;
+    if(e.key==='Tab')return;
+    e.stopImmediatePropagation();
+  },true);
+})();
+
+})();
+</script>
+</body>
+</html>
